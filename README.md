@@ -171,10 +171,11 @@
        * Start the AWS EC2 instance for running the experiments, which will be
          hereafterwards referred to as EXP_AWS_EC2
 
-       * Copy requirements.txt and exp.py from your local copy to the AWS EC2 instance created
-         (usually under "/home/ec2-user")
+       * Copy exp-requirements.txt and exp.py from your local copy to the AWS EC2 instance created
+         (usually under "/home/ec2-user") or create those files under /home/ec2-user and copy
+         the contents from local repository using copy-paste.
 
-       * run "pip3 install -r requirements.txt" to install the dependencies. 
+       * run "pip3 install -r exp-requirements.txt" to install the dependencies. 
          Note: In the latest versions of Python, pip3 is just pip. Check what works in your AWS EC2 instance.
 
          The versions of the dependencies are specified in the requirements.txt file itself,
