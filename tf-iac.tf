@@ -55,6 +55,7 @@ resource "aws_db_instance" "tf-mlflow-rds" {
   db_name              = "tfMlflowBackendDb"
   username             = "mlflowuser"
   password             = "mlflowpass"
+  security_group_names = ["launch-wizard-2"]
   skip_final_snapshot  = true
 }
 

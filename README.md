@@ -112,10 +112,17 @@
 
        * The terraform file that defines the infrastructure is available in the
        project directory as "tf-iac.tf". This file uses AWS as the service
-       provider
+       provider. Please refer to terraform documentation for how to use it.
+
+       Note: Have the "tf-iac.tf" in a different directory than the project
+       directory, so that the project directory is not cluttered with huge-sized
+       terraform files (usually created under .terraform directory under the
+       current path).
 
        * Plan, validate, and apply the infrastructure as defined in "tf-iac.tf",
        so that the infrastructure is available for the project to get executed.
+
+       
 
        Initializing MLFlow
 
@@ -124,9 +131,6 @@
          Note: Don't create the infrastructure; they have been created already.
          Just make sure that the settings are right:
          https://github.com/DataTalksClub/mlops-zoomcamp/blob/main/02-experiment-tracking/mlflow_on_aws.md
-
-         Configure EC2 instance's security group to accept TCP port 5000 as inbound
-         in the inbound rules to let MLFlow inbound connections in.
 
          The MLFlow Postgresql database will be hereafterwards referred
          in this document as POSTGRESQLNAME
@@ -148,20 +152,23 @@
        * The name of the experiment is initialized to "Experiment In The Cloud" in this project. You will
          find an experiment created in MLFlow with this name.
 
-       * Launch the MLFlow server in AWS and install mlflow with 'pip3 install mlflow'.
-         Note 1: In the latest versions of Python, pip3 is just pip. Check what works in your AWS EC2 instance.
-         Note 2: If there is an error about psycopg2, then do 'pip3 install psycopg2-binary' to install the dependency.
-         
+       * Launch the MLFlow AWS EC2 instance (hereafterwards known as MLFLOW_AWS_EC2) in AWS
+        
+       * Copy mlflow-server-requirements.txt from project local repository to MLFLOW_AWS_EC2 home directory (usually /home/ec2) using SCP or SFTP or simply
+         opening a file in MLFLOW_AWS_EC2 like /home/ec2/mlflow-server-requirements.txt and copying the contents of the file to that file.
 
-       * Install 'boto3' for AWS S3 access using 'pip3 install boto3'.
+       * Run 'pip3 install -r mlflow-server-requirements.txt'
+
+         Note: In the latest versions of Python, pip3 is just pip. Check what works in your AWS EC2 instance.
 
        * Make sure that you have your AWS credentials specified in this server by running 'aws configure'.
      
-       * Start the MLFlow server in the MLFlow AWS EC2 instance with the following command:
+       * Start the MLFlow server in MLFLOW_AWS_EC2 instance with the following command after making sure that the security groups associated with the 
+         MLFLOW_AWS_EC2 and POSTGRESQLNAME are configured to talk to each other through port 5432 (PostGre):
          
          mlflow server -h 0.0.0.0 -p 5000 --backend-store-uri postgresql://DB_USER:DB_PASSWORD@DB_ENDPOINT:5432/POSTGRESQLNAME --default-artifact-root s3://MLFLOW_AWS_S3_BUCKET_NAME
 
-       * Start the AWS EC2 nstance for running the experiments, which will be
+       * Start the AWS EC2 instance for running the experiments, which will be
          hereafterwards referred to as EXP_AWS_EC2
 
        * Copy requirements.txt and exp.py from your local copy to the AWS EC2 instance created
