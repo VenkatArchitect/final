@@ -107,42 +107,51 @@
        production for the first time, and to make prefect run the experiment
        run every month through deployment, do the following:
 
+       Deploy the necessary infrastructure through IaC (Infrastructure-As-Code)
+       through Terraform.
+
+       * The terraform file that defines the infrastructure is available in the
+       project directory as "tf-iac.tf". This file uses AWS as the service
+       provider
+
+       * Plan, validate, and apply the infrastructure as defined in "tf-iac.tf",
+       so that the infrastructure is available for the project to get executed.
+
        Initializing MLFlow
 
-       * Create an AWS EC2 instance for MLFlow along with an AWS S3 bucket for
-         artifact(s) and AWS RDS for MLFlow database as described at:
+       * For MLFlow related infrastructure created above, follow the instructions
+         in the link below to make sure that the settings are done correctly.
+         Note: Don't create the infrastructure; they have been created already.
+         Just make sure that the settings are right:
          https://github.com/DataTalksClub/mlops-zoomcamp/blob/main/02-experiment-tracking/mlflow_on_aws.md
 
          Configure EC2 instance's security group to accept TCP port 5000 as inbound
          in the inbound rules to let MLFlow inbound connections in.
 
-         The MLFlow Postgresql database, which will be hereafterwards referred
+         The MLFlow Postgresql database will be hereafterwards referred
          in this document as POSTGRESQLNAME
 
-         The MLFlow artifact, which is the AWS S3 bucket will be hereafterwards referred
-         in this document as MLFLOW_AWS_S3_BUCKET.
+         The MLFlow S3 bucket will be hereafterwards referred in this document as MLFLOW_AWS_S3_BUCKET.
 
-         The username and password noted down during the database creation will be known
-         hereafterwards as DB_USER and DB_PASSWORD.
+         The database username and password will be known hereafterwards as DB_USER and DB_PASSWORD.
 
-         Note down the endpoint name of the RDS database from its dashboard. It will be
-         known hereafterwards as DB_ENDPOINT.
+         The endpoint name of the RDS database will be known hereafterwards as DB_ENDPOINT.
 
-       * Note down the public IP address of the above-created EC2 instance, hereafterwards
-         referred in this document as MLFLOW_ADDRESS
+         The public IP address of the EC2 instance hereafterwards will be referred in this document as MLFLOW_ADDRESS
 
-       * In the local copy of the project:
-            A) Modify the IP address in the TRACKING_URI definition in exp.py somewhere around line 16
+       * In the local copy of exp.py of the project:
+            A) Modify the IP address in the TRACKING_URI definition somewhere around line 16
                to MLFLOW_ADDRESS noted above.
-            B) Create an AWS S3 bucket and specify the bucket name for BUCKET_NAME definition somewhere
-               around line 14 of exp.py.
+            B) Specify the bucket name for BUCKET_NAME definition somewhere around line 14.
             C) Copy iris-data.csv file from your local copy to the S3 bucket.
 
        * The name of the experiment is initialized to "Experiment In The Cloud" in this project. You will
          find an experiment created in MLFlow with this name.
 
-       * Launch the MLFlow AWS instance and install mlflow with 'pip3 install mlflow'.
-         Note: If there is an error about psycopg2, then do 'pip3 install psycopg2-binary' to install the dependency.
+       * Launch the MLFlow server in AWS and install mlflow with 'pip3 install mlflow'.
+         Note 1: In the latest versions of Python, pip3 is just pip. Check what works in your AWS EC2 instance.
+         Note 2: If there is an error about psycopg2, then do 'pip3 install psycopg2-binary' to install the dependency.
+         
 
        * Install 'boto3' for AWS S3 access using 'pip3 install boto3'.
 
@@ -152,7 +161,7 @@
          
          mlflow server -h 0.0.0.0 -p 5000 --backend-store-uri postgresql://DB_USER:DB_PASSWORD@DB_ENDPOINT:5432/POSTGRESQLNAME --default-artifact-root s3://MLFLOW_AWS_S3_BUCKET_NAME
 
-       * Create an AWS EC2 instance for running the experiments, which will be
+       * Start the AWS EC2 nstance for running the experiments, which will be
          hereafterwards referred to as EXP_AWS_EC2
 
        * Copy requirements.txt and exp.py from your local copy to the AWS EC2 instance created
@@ -176,29 +185,32 @@
        * Start the Prefect Orion UI using command 'prefect orion start' in a terminal of the EXP_AWS_EC2         
 
        * Start Prefect agent in one more terminal of EXP_AWS_EC2 using command 'prefect agent start -q <QUEUE_NAME>
-         Note: The QUEUE_NAME is specified under the deployment definition in exp.py
+         Note: The QUEUE_NAME is specified under the deployment definition in exp_deploy.py
 
-       * Run 'python3 exp.py' or 'python exp.py' depending on what Python Version 3 is available in your
+       * Run 'python3 exp_deploy.py' or 'python exp_deploy.py' depending on what Python Version 3 is available in your
          AWS EC2 instance. It is recommended that you run Python 3.9.13 for the latest and stable version in
          the 3.9 branch.
 
-       * The python program exp.py runs and does the following:
+       * The python program exp_deploy.py runs and does the following:
 
-         - Runs the experiment with several combinations of algorithms, feature engineering, hyperparameters
-           and number of cross validation cycles to be performed.
+         - Executes the logic from exp.py:
 
-         - Selects the best model and registers it in MLFlow
+             - Runs the experiment with several combinations of algorithms, feature engineering, hyperparameters
+               and number of cross validation cycles to be performed.
 
-         - Promotes the best model as Version 1 in production in MLFlow (when run for the first time)
+             - Selects the best model and registers it in MLFlow
 
-         - Reads the Prefect deployment specification specified somewhere around line 278 of exp.py and schedules
+             - Promotes the best model as Version 1 in production in MLFlow (when run for the first time)
+
+         - Deploys the prefect deployment specification in exp_deploy.py and schedules
            prefect flow runs that would run once in every month.
 
-       * To check the Prefect flow runs created, scheduled, and completed, launch the prefect orion UI in the browser:
+       * To check the Prefect flow runs created, scheduled, and completed, launch the prefect orion UI in the browser
+         launched from EXP_AWS_EC2 server:
 
          http://127.0.0.1/4200
 
-       This completes the instructions for running, scheduling and tracking experiment in exp.py
+       This completes the instructions for running, scheduling and tracking experiment in exp_deploy.py
 
 
      MODEL DEPLOYMENT AND PREDICTION (model_deploy/predict.py)
@@ -248,21 +260,13 @@
          and verify that 'Iris Setosa' is displayed.
 
          You can similarly provide various data values from the Iris-data.csv file included
-         in this repository to check if the flower types are predicted correctly. Most of them
-         should be, but there can be wrong predictions here and there. The best prediction
-         accuracy I got was 1 wrong prediction out of 150 entries, which is 0.66%. The worst prediction accuracy
-         I got was 5 wrong predictions out of 150 entries, which is 3.33%.
+         in this project repository to check if the flower types are predicted correctly. Most of them
+         should be, but there could be very minimal wrong predictions here and there. Accuraries I got:
+
+             - Best accuracy: 1 wrong prediction out of 150 entries, which is 0.66%. The worst prediction accuracy
+             - Worst accuracy: 5 wrong predictions out of 150 entries, which is 3.33%.
 
          This completes the instructions for model deployment and prediction.
-
-
-
-
-
-       
-
-
-
 
 
 
