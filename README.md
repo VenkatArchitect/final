@@ -168,17 +168,11 @@
          
          mlflow server -h 0.0.0.0 -p 5000 --backend-store-uri postgresql://DB_USER:DB_PASSWORD@DB_ENDPOINT:5432/POSTGRESQLNAME --default-artifact-root s3://MLFLOW_AWS_S3_BUCKET_NAME
 
-       * Start the AWS EC2 instance for running the experiments, which will be
-         hereafterwards referred to as EXP_AWS_EC2
+       * Locate a machine that can run as your experiment server. We will call this machine as EXP_SERVER hereafterwards.
 
-       * Copy exp-requirements.txt and exp.py from your local copy to the AWS EC2 instance created
-         (usually under "/home/ec2-user") or create those files under /home/ec2-user and copy
-         the contents from local repository using copy-paste.
+         IMPORTANT NOTE: THE MACHINE SHOULD HAVE THE FOLLOWING VERSION DEPENDENCIES SATISFIED.
 
-       * run "pip3 install -r exp-requirements.txt" to install the dependencies. 
-         Note: In the latest versions of Python, pip3 is just pip. Check what works in your AWS EC2 instance.
-
-         The versions of the dependencies are specified in the requirements.txt file itself,
+         The versions of the dependencies are specified in the exp-requirements.txt file itself,
          but repeating it once more here for clarity:
 
          Dependency Versions:
@@ -190,13 +184,25 @@
          prefect>=2.3.1
          boto3>=1.24.61
 
-       * Start the Prefect Orion UI using command 'prefect orion start' in a terminal of the EXP_AWS_EC2         
+       * Copy exp-requirements.txt, exp.py, and exp-deploy.py from your local copy to a directory/environment
+         in EXP_SERVER where you will run the server.
 
-       * Start Prefect agent in one more terminal of EXP_AWS_EC2 using command 'prefect agent start -q <QUEUE_NAME>
+       * Do 'sudo yum install' in Linux environments.
+
+       * run "pip3 install -r exp-requirements.txt" to install the dependencies. 
+         Note: In the latest versions of Python, pip3 is just pip. Check what works in your EXP_SERVER.
+
+       * Start the Prefect Cloud UI using command in the browser - "https://app.prefect.cloud". Create a workspace
+         where you will be monitoring all the flow runs.
+
+       * Link your local environment to the workspace created in the previous step using:
+         "prefect cloud workspace set" and then selecting the workspace from the options provided.
+
+       * Start Prefect agent in a terminal of EXP_SERVER using command 'prefect agent start -q <QUEUE_NAME>
          Note: The QUEUE_NAME is specified under the deployment definition in exp_deploy.py
 
        * Run 'python3 exp_deploy.py' or 'python exp_deploy.py' depending on what Python Version 3 is available in your
-         AWS EC2 instance. It is recommended that you run Python 3.9.13 for the latest and stable version in
+         machine. It is recommended that you run Python 3.9.13 for the latest and stable version in
          the 3.9 branch.
 
        * The python program exp_deploy.py runs and does the following:
@@ -213,10 +219,11 @@
          - Deploys the prefect deployment specification in exp_deploy.py and schedules
            prefect flow runs that would run once in every month.
 
-       * To check the Prefect flow runs created, scheduled, and completed, launch the prefect orion UI in the browser
-         launched from EXP_AWS_EC2 server:
+       * Check the Prefect flow runs created, scheduled, and completed in the launched Prefect Cloud
+         under the workspace created.
 
-         http://127.0.0.1/4200
+       The flow runs should be deployed and completed at the interval configured in the deployment spec.
+       defined in exp_deploy.py.
 
        This completes the instructions for running, scheduling and tracking experiment in exp_deploy.py
 
