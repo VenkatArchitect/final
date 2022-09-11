@@ -300,6 +300,13 @@
          This completes the instructions for model deployment and prediction.
 
 
+     UNIT AND INTEGRATION TESTS
+
+     Unit and integration tests are available in tests/test_exp.py.
+
+
+
+
 
     
 
