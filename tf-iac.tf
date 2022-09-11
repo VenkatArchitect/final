@@ -16,7 +16,6 @@ provider "aws" {
 resource "aws_instance" "tf-exp-server" {
   ami           = "ami-06489866022e12a14"
   instance_type = "t2.micro"
-  key_name = "ec2-keypair"
   security_groups = ["launch-wizard-2"]
 
   tags = {
@@ -55,7 +54,6 @@ resource "aws_db_instance" "tf-mlflow-rds" {
   db_name              = "tfMlflowBackendDb"
   username             = "mlflowuser"
   password             = "mlflowpass"
-  security_group_names = ["launch-wizard-2"]
   skip_final_snapshot  = true
 }
 

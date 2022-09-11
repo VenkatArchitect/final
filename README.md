@@ -132,6 +132,9 @@
          Just make sure that the settings are right:
          https://github.com/DataTalksClub/mlops-zoomcamp/blob/main/02-experiment-tracking/mlflow_on_aws.md
 
+         Note: Make sure that the security group you select for the RDS has permissions to the ports referred
+         to in the link above.
+
          The MLFlow Postgresql database will be hereafterwards referred
          in this document as POSTGRESQLNAME
 
@@ -172,7 +175,13 @@
 
          IMPORTANT NOTE: THE MACHINE SHOULD HAVE THE FOLLOWING VERSION DEPENDENCIES SATISFIED.
 
-         The versions of the dependencies are specified in the exp-requirements.txt file itself,
+         1) Python should be >= 3.9.6, better be 3.9.13.
+
+         2) sqlite3 should be as latest as possible, better be 3.33.0.
+
+         After making sure that the above requirements are satisfied, please go to step 3) below.
+
+         3) The versions of the dependencies are specified in the exp-requirements.txt file itself,
          but repeating it once more here for clarity:
 
          Dependency Versions:
@@ -183,14 +192,17 @@
          scikit-learn>=1.1.2
          prefect>=2.3.1
          boto3>=1.24.61
+         
 
        * Copy exp-requirements.txt, exp.py, and exp-deploy.py from your local copy to a directory/environment
-         in EXP_SERVER where you will run the server.
+         in EXP_SERVER where you will run the experiments.
 
        * Do 'sudo yum install' in Linux environments.
 
        * run "pip3 install -r exp-requirements.txt" to install the dependencies. 
          Note: In the latest versions of Python, pip3 is just pip. Check what works in your EXP_SERVER.
+
+       * Run 'aws configure' and configure your aws credentials.
 
        * Start the Prefect Cloud UI using command in the browser - "https://app.prefect.cloud". Create a workspace
          where you will be monitoring all the flow runs.
