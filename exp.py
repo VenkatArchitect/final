@@ -18,13 +18,13 @@ BUCKET_NAME = 'tf-dataset-bucket'
 DATA_FILE_NAME = 'iris-data.csv'
 TRACKING_URI = "http://127.0.0.1:5000"
 
-def get_experiment_id():
+def get_experiment_name():
     return("Experiment In The Cloud")
 
 def initialize_mlflow ():
     mlflow.autolog(disable=True)
     mlflow.set_tracking_uri(TRACKING_URI)
-    mlflow.set_experiment(get_experiment_id())
+    mlflow.set_experiment(get_experiment_name())
     mlflow_client = mlflow.MlflowClient()
     return mlflow_client
 
@@ -229,19 +229,19 @@ def run_experiments ():
     run_experiment (proc_data, LogisticRegression(), 9, 3, True)
 
 
-def get_best_model_version(exp_id, fclient):
+def get_best_model_version(exp_name, fclient):
 
-    experiment = fclient.get_experiment_by_name(exp_id)
+    experiment = fclient.get_experiment_by_name(exp_name)
 
-    experiment_instance = experiment.experiment_id
+    experiment_id = experiment.experiment_id
 
-    run_list = fclient.search_runs(experiment_instance,
+    run_list = fclient.search_runs(experiment_id,
                                    filter_string="metric.Wrongpredictions < 2", run_view_type=ViewType.ALL,
                                    max_results=1,
                                    order_by=["metric.Score DESC"])
 
     if len(run_list) == 0:
-        run_list = fclient.search_runs(experiment_instance,
+        run_list = fclient.search_runs(experiment_id,
                                        filter_string="", run_view_type=ViewType.ALL,
                                        max_results=1,
                                        order_by=["metric.Score DESC"])
@@ -269,10 +269,10 @@ def deploy_best_model(model_version, fclient):
 
 @flow(task_runner=SequentialTaskRunner())
 def workflow_orchestration():
-    exp_id = get_experiment_id()
+    exp_name = get_experiment_name()
     fclient = initialize_mlflow()
     run_experiments()
-    deploy_best_model(get_best_model_version(exp_id, fclient), fclient)
+    deploy_best_model(get_best_model_version(exp_name, fclient), fclient)
 
 if __name__ == '__main__':
     workflow_orchestration()

@@ -8,12 +8,12 @@ RUN_ID='110b8ed7fbc7462faae213e7ab705047'
 app = Flask('predict')
 
 
-def get_experiment_id_deployment():
+def get_experiment_name_deployment():
     return("Experiment In The Cloud")
 def flask_initialize_mlflow ():
     mlflow.autolog(disable=True)
     mlflow.set_tracking_uri(MLFLOW_SERVER_URI)
-    mlflow.set_experiment(get_experiment_id_deployment())
+    mlflow.set_experiment(get_experiment_name_deployment())
     mlflow_client = mlflow.MlflowClient()
     return mlflow_client
 
@@ -30,10 +30,6 @@ def predict(slen, swid, plen, pwid):
     # swid = args[1]
     # plen = args[2]
     # pwid = args[3]
-
-    client = mlflow.MlflowClient()
-
-    experiment_instance = client.get_experiment_by_name(get_experiment_id_deployment()).experiment_id
 
     run = mlflow.get_run(RUN_ID)
 
@@ -58,6 +54,3 @@ if __name__ == "__main__":
     flask_initialize_mlflow()
 
     app.run(debug=True, host='0.0.0.0', port=9696)
-
-
-
