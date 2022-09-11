@@ -198,7 +198,7 @@
          boto3>=1.24.61
          
 
-       * Copy exp-requirements.txt, exp.py, and exp-deploy.py from your local copy to a directory/environment
+       * Copy exp-requirements.txt, exp.py, and exp_deploy.py from your local copy to a directory/environment
          in EXP_SERVER where you will run the experiments.
 
        * Do 'sudo yum install' in Linux environments.

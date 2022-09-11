@@ -246,6 +246,10 @@ def get_best_model_version(exp_id, fclient):
                                        max_results=1,
                                        order_by=["metric.Score DESC"])
 
+    # if the list is still empty, it means no qualifying experiments available to promote to production!
+    if (len(run_list) == 0):
+        return (0)
+
     run = run_list[0]
 
     version = int(mlflow.register_model(model_uri='runs:/' + run.info.run_id + '/model', name="The model with the best performance").version)
@@ -255,10 +259,12 @@ def get_best_model_version(exp_id, fclient):
 @task
 def deploy_best_model(model_version, fclient):
 
-    # Now that we have selected the best model, we will move it to staging and production
-    fclient.transition_model_version_stage(name="The model with the best performance", version=str(model_version),
+    if (model_version != 0):
+
+        # Now that we have selected the best model, we will move it to staging and production
+        fclient.transition_model_version_stage(name="The model with the best performance", version=str(model_version),
                                           stage="Staging")
-    fclient.transition_model_version_stage(name="The model with the best performance", version=str(model_version),
+        fclient.transition_model_version_stage(name="The model with the best performance", version=str(model_version),
                                           stage="Production")
 
 @flow(task_runner=SequentialTaskRunner())
