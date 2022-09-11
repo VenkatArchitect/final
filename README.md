@@ -73,6 +73,10 @@
     the algorithm that has the highest cross-validation score will be promoted
     to production.
 
+    Since the Iris dataset is rarely updated, the experiments will be run
+    once in a month on the first day of every month, and the best model will
+    be selected and moved to production in MLFlow.
+
 
     SOLUTION OVERVIEW
 
