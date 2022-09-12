@@ -1,10 +1,9 @@
 from flask import Flask
 import mlflow
 import pandas as pd
-from mlflow.entities import ViewType
 
-MLFLOW_SERVER_URI = "http://43.205.178.191:5000"
-RUN_ID='110b8ed7fbc7462faae213e7ab705047'
+MLFLOW_SERVER_URI = "http://43.205.135.6:5000"
+RUN_ID='7a11ee1030ee4f908a5c5cfc9a936488'
 app = Flask('predict')
 
 
